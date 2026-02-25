@@ -33,7 +33,14 @@ class NewsFragment : Fragment() {
             factory
         }
 
-        val newsAdapter = NewsAdapter()
+        val newsAdapter = NewsAdapter { news ->
+            if (news.isBookmarked) {
+                viewModel.deleteNews(news)
+            } else {
+                viewModel.saveNews(news)
+            }
+        }
+
 
         if (tabName == TAB_NEWS) {
             viewModel.getHeadlineNews().observe(viewLifecycleOwner) { result ->
@@ -42,11 +49,13 @@ class NewsFragment : Fragment() {
                         is Result.Loading -> {
                             binding?.progressBar?.visibility = View.VISIBLE
                         }
+
                         is Result.Success -> {
                             binding?.progressBar?.visibility = View.GONE
                             val newsData = result.data
                             newsAdapter.submitList(newsData)
                         }
+
                         is Result.Error -> {
                             binding?.progressBar?.visibility = View.GONE
                             Toast.makeText(
@@ -57,6 +66,11 @@ class NewsFragment : Fragment() {
                         }
                     }
                 }
+            }
+        } else if (tabName == TAB_BOOKMARK) {
+            viewModel.getBookmarkedNews().observe(viewLifecycleOwner) { bookmarkedNews ->
+                binding?.progressBar?.visibility = View.GONE
+                newsAdapter.submitList(bookmarkedNews)
             }
         }
 
