@@ -23,9 +23,9 @@ class NewsRepository private constructor(
 
         client.enqueue(object : Callback<NewsResponse> {
             override fun onResponse(
-                call: Call<NewsResponse?>?, response: Response<NewsResponse?>?
+                call: Call<NewsResponse?>, response: Response<NewsResponse?>
             ) {
-                if (response != null && response.isSuccessful) {
+                if (response.isSuccessful) {
                     val articles = response.body()?.articles
                     val newsList = ArrayList<NewsEntity>()
 
@@ -41,17 +41,16 @@ class NewsRepository private constructor(
                             )
                             newsList.add(news)
                         }
+                        newsDao.deleteAll()
+                        newsDao.insertNews(newsList)
                     }
-                    newsDao.deleteAll()
-                    newsDao.insertNews(newsList)
-
                 }
             }
 
             override fun onFailure(
-                call: Call<NewsResponse?>?, t: Throwable?
+                call: Call<NewsResponse?>, t: Throwable
             ) {
-                result.value = Result.Error(t?.message.toString())
+                result.value = Result.Error(t.message.toString())
             }
         })
 
